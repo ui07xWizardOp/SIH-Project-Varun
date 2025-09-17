@@ -101,12 +101,6 @@ const Dashboard = () => {
     { id: "home", label: "Home", icon: Home },
     { id: "overview", label: "Overview", icon: Activity },
     { id: "command", label: "Command Center", icon: Command },
-    { id: "heart", label: "Heart", icon: Heart },
-    { id: "brain", label: "Brain", icon: Brain },
-    { id: "lungs", label: "Lungs", icon: Zap },
-    { id: "digestive", label: "Digestive", icon: TrendingUp },
-    { id: "cancer", label: "Cancer", icon: AlertTriangle },
-    { id: "hormones", label: "Hormones", icon: Settings },
   ];
 
   return (
