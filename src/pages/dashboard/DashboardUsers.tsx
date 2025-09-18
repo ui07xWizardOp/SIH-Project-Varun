@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -25,6 +27,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   Users,
@@ -39,18 +52,33 @@ import {
   Trash2,
   MoreHorizontal,
   UserCog,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Eye,
+  Settings,
+  Activity,
+  Crown,
+  Wrench,
+  BarChart3,
 } from "lucide-react";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "operator" | "analyst" | "viewer";
-  status: "active" | "inactive" | "pending";
+  phone: string;
+  role: "super_admin" | "admin" | "operator" | "analyst" | "viewer" | "moderator";
+  status: "active" | "inactive" | "pending" | "suspended";
   location: string;
+  department: string;
   lastActive: string;
   reportsSubmitted: number;
+  verifiedReports: number;
   avatar?: string;
+  joinedDate: string;
+  permissions: string[];
+  isOnline: boolean;
 }
 
 const usersData: User[] = [
@@ -58,42 +86,130 @@ const usersData: User[] = [
     id: "USR-001",
     name: "Dr. Sarah Chen",
     email: "sarah.chen@oceansafe.gov",
-    role: "admin",
+    phone: "+1-555-0101",
+    role: "super_admin",
     status: "active",
     location: "Pacific Coast HQ",
+    department: "Administration",
     lastActive: "5 minutes ago",
     reportsSubmitted: 47,
+    verifiedReports: 45,
     avatar: "/avatars/sarah.jpg",
+    joinedDate: "2023-01-15",
+    permissions: ["all"],
+    isOnline: true,
   },
   {
     id: "USR-002", 
     name: "Marcus Rodriguez",
     email: "m.rodriguez@oceansafe.gov",
-    role: "operator",
+    phone: "+1-555-0102",
+    role: "admin",
     status: "active",
     location: "Hawaii Station",
+    department: "Operations",
     lastActive: "2 hours ago",
     reportsSubmitted: 23,
+    verifiedReports: 22,
+    joinedDate: "2023-02-20",
+    permissions: ["manage_users", "view_reports", "approve_reports"],
+    isOnline: true,
   },
   {
     id: "USR-003",
     name: "Emma Thompson",
-    email: "emma.t@oceansafe.gov", 
+    email: "emma.t@oceansafe.gov",
+    phone: "+1-555-0103",
     role: "analyst",
     status: "inactive",
     location: "California Coast",
+    department: "Data Analysis",
     lastActive: "1 day ago",
     reportsSubmitted: 89,
+    verifiedReports: 87,
+    joinedDate: "2023-03-10",
+    permissions: ["view_reports", "analyze_data"],
+    isOnline: false,
   },
   {
     id: "USR-004",
-    name: "James Park",
+    name: "James Park", 
     email: "j.park@oceansafe.gov",
-    role: "viewer",
+    phone: "+1-555-0104",
+    role: "operator",
     status: "pending",
     location: "Remote",
+    department: "Field Operations",
     lastActive: "Never",
     reportsSubmitted: 0,
+    verifiedReports: 0,
+    joinedDate: "2024-01-05",
+    permissions: ["submit_reports"],
+    isOnline: false,
+  },
+  {
+    id: "USR-005",
+    name: "Dr. Rajesh Patel",
+    email: "r.patel@oceansafe.gov",
+    phone: "+1-555-0105",
+    role: "analyst",
+    status: "active",
+    location: "Mumbai Research Center",
+    department: "Marine Biology",
+    lastActive: "30 minutes ago",
+    reportsSubmitted: 156,
+    verifiedReports: 152,
+    joinedDate: "2022-11-12",
+    permissions: ["view_reports", "analyze_data", "research_access"],
+    isOnline: true,
+  },
+  {
+    id: "USR-006",
+    name: "Lisa Wang",
+    email: "l.wang@oceansafe.gov", 
+    phone: "+1-555-0106",
+    role: "moderator",
+    status: "active",
+    location: "Singapore Station",
+    department: "Community Relations",
+    lastActive: "1 hour ago",
+    reportsSubmitted: 34,
+    verifiedReports: 32,
+    joinedDate: "2023-06-18",
+    permissions: ["moderate_reports", "community_management"],
+    isOnline: true,
+  },
+  {
+    id: "USR-007",
+    name: "Captain Torres",
+    email: "torres@oceansafe.gov",
+    phone: "+1-555-0107",
+    role: "operator",
+    status: "suspended",
+    location: "Atlantic Fleet",
+    department: "Maritime Operations",
+    lastActive: "5 days ago",
+    reportsSubmitted: 78,
+    verifiedReports: 70,
+    joinedDate: "2023-04-22",
+    permissions: ["submit_reports", "field_operations"],
+    isOnline: false,
+  },
+  {
+    id: "USR-008",
+    name: "Dr. Priya Sharma",
+    email: "p.sharma@oceansafe.gov",
+    phone: "+1-555-0108", 
+    role: "viewer",
+    status: "active",
+    location: "Chennai Coastal Lab",
+    department: "Research",
+    lastActive: "3 hours ago",
+    reportsSubmitted: 12,
+    verifiedReports: 10,
+    joinedDate: "2024-02-14",
+    permissions: ["view_reports"],
+    isOnline: true,
   },
 ];
 
@@ -102,14 +218,39 @@ export default function DashboardUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isRoleChangeDialogOpen, setIsRoleChangeDialogOpen] = useState(false);
+  const [newRole, setNewRole] = useState<User['role']>("viewer");
+  const [isDemo, setIsDemo] = useState(true);
   const { toast } = useToast();
+
+  // Demo mode - simulate real-time updates
+  useEffect(() => {
+    if (!isDemo) return;
+    
+    const interval = setInterval(() => {
+      setUsers(prevUsers => 
+        prevUsers.map(user => ({
+          ...user,
+          isOnline: Math.random() > 0.7,
+          lastActive: user.isOnline ? "Just now" : user.lastActive,
+        }))
+      );
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [isDemo]);
 
   const getRoleColor = (role: string) => {
     switch (role) {
+      case "super_admin": return "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 border-purple-500/30";
       case "admin": return "bg-red-500/10 text-red-400 border-red-500/20";
       case "operator": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
       case "analyst": return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+      case "moderator": return "bg-orange-500/10 text-orange-400 border-orange-500/20";
       case "viewer": return "bg-gray-500/10 text-gray-400 border-gray-500/20";
       default: return "bg-gray-500/10 text-gray-400 border-gray-500/20";
     }
@@ -120,7 +261,32 @@ export default function DashboardUsers() {
       case "active": return "bg-green-500/10 text-green-400 border-green-500/20";
       case "inactive": return "bg-gray-500/10 text-gray-400 border-gray-500/20";
       case "pending": return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+      case "suspended": return "bg-red-500/10 text-red-400 border-red-500/20";
       default: return "bg-gray-500/10 text-gray-400 border-gray-500/20";
+    }
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "super_admin": return Crown;
+      case "admin": return Settings;
+      case "operator": return Wrench;
+      case "analyst": return BarChart3;
+      case "moderator": return Shield;
+      case "viewer": return Eye;
+      default: return Eye;
+    }
+  };
+
+  const getRoleDescription = (role: string) => {
+    switch (role) {
+      case "super_admin": return "Full system access and control";
+      case "admin": return "Administrative privileges and user management";
+      case "operator": return "Field operations and report management";
+      case "analyst": return "Data analysis and reporting tools";
+      case "moderator": return "Community management and content moderation";
+      case "viewer": return "Read-only access to reports and data";
+      default: return "Basic access";
     }
   };
 
@@ -133,24 +299,65 @@ export default function DashboardUsers() {
     
     const user = users.find(u => u.id === userId);
     toast({
-      title: "Role Updated",
-      description: `${user?.name}'s role has been changed to ${newRole.toUpperCase()}`,
+      title: "✅ Role Updated Successfully",
+      description: `${user?.name}'s role has been changed to ${newRole.replace('_', ' ').toUpperCase()}. ${getRoleDescription(newRole)}`,
+    });
+    setIsRoleChangeDialogOpen(false);
+    setSelectedUser(null);
+  };
+
+  const changeUserStatus = (userId: string, newStatus: User['status']) => {
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === userId ? { ...user, status: newStatus } : user
+      )
+    );
+    
+    const user = users.find(u => u.id === userId);
+    const statusAction = newStatus === 'active' ? 'activated' : newStatus === 'suspended' ? 'suspended' : newStatus;
+    toast({
+      title: `User ${statusAction}`,
+      description: `${user?.name} has been ${statusAction}`,
+    });
+  };
+
+  const deleteUser = (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+    toast({
+      title: "User Deleted",
+      description: `${user?.name} has been removed from the system`,
+      variant: "destructive",
+    });
+    setIsDeleteDialogOpen(false);
+    setSelectedUser(null);
+  };
+
+  const approveUser = (userId: string) => {
+    changeUserStatus(userId, 'active');
+    toast({
+      title: "✅ User Approved",
+      description: "User has been approved and activated",
     });
   };
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.location.toLowerCase().includes(searchTerm.toLowerCase());
+                         user.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.department.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
     const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+    const matchesDepartment = departmentFilter === "all" || user.department === departmentFilter; 
     
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesSearch && matchesRole && matchesStatus && matchesDepartment;
   });
 
   const totalUsers = users.length;
   const activeUsers = users.filter(user => user.status === "active").length;
   const pendingUsers = users.filter(user => user.status === "pending").length;
+  const suspendedUsers = users.filter(user => user.status === "suspended").length;
+  const onlineUsers = users.filter(user => user.isOnline).length;
 
   return (
     <div className="space-y-6">
@@ -265,6 +472,39 @@ export default function DashboardUsers() {
         </Card>
       </div>
 
+      {/* Additional Status Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Online Now</p>
+                <p className="text-3xl font-bold text-success">{onlineUsers}</p>
+                <p className="text-xs text-muted-foreground mt-1">Real-time status</p>
+              </div>
+              <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
+                <Activity className="w-6 h-6 text-success" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Suspended</p>
+                <p className="text-3xl font-bold text-destructive">{suspendedUsers}</p>
+                <p className="text-xs text-muted-foreground mt-1">Require attention</p>
+              </div>
+              <div className="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-destructive" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters and Search */}
       <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
         <CardContent className="p-6">
@@ -301,6 +541,23 @@ export default function DashboardUsers() {
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="suspended">Suspended</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="Administration">Administration</SelectItem>
+                <SelectItem value="Operations">Operations</SelectItem>
+                <SelectItem value="Data Analysis">Data Analysis</SelectItem>
+                <SelectItem value="Field Operations">Field Operations</SelectItem>
+                <SelectItem value="Marine Biology">Marine Biology</SelectItem>
+                <SelectItem value="Community Relations">Community Relations</SelectItem>
+                <SelectItem value="Maritime Operations">Maritime Operations</SelectItem>
+                <SelectItem value="Research">Research</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -314,27 +571,44 @@ export default function DashboardUsers() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback className="bg-muted">
-                      {user.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={user.avatar} />
+                      <AvatarFallback className="bg-muted">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    {user.isOnline && (
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full"></div>
+                    )}
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-1">
-                      <h3 className="font-semibold text-foreground">{user.name}</h3>
-                      <Badge className={getRoleColor(user.role)}>
-                        {user.role.toUpperCase()}
+                      <h3 className="font-semibold text-foreground flex items-center">
+                        {user.name}
+                        {user.isOnline && <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>}
+                      </h3>
+                      <Badge className={getRoleColor(user.role)} variant="outline">
+                        {React.createElement(getRoleIcon(user.role), { className: "w-3 h-3 mr-1" })}
+                        {user.role.replace('_', ' ').toUpperCase()}
                       </Badge>
-                      <Badge className={getStatusColor(user.status)}>
+                      <Badge className={getStatusColor(user.status)} variant="outline">
+                        {user.status === 'active' && <CheckCircle className="w-3 h-3 mr-1" />}
+                        {user.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                        {user.status === 'suspended' && <XCircle className="w-3 h-3 mr-1" />}
+                        {user.status === 'inactive' && <AlertCircle className="w-3 h-3 mr-1" />}
                         {user.status.toUpperCase()}
                       </Badge>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center">
                         <Mail className="w-3 h-3 mr-1" />
                         {user.email}
+                      </span>
+                      <span className="flex items-center">
+                        <Phone className="w-3 h-3 mr-1" />
+                        {user.phone}
                       </span>
                       <span className="flex items-center">
                         <MapPin className="w-3 h-3 mr-1" />
@@ -349,73 +623,121 @@ export default function DashboardUsers() {
                         {user.reportsSubmitted} reports
                       </span>
                     </div>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      <span className="font-medium">{user.department}</span> • Joined {user.joinedDate} • {user.verifiedReports} verified reports
+                    </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setNewRole(user.role);
+                      setIsRoleChangeDialogOpen(true);
+                    }}
+                  >
+                    <UserCog className="w-3 h-3 mr-1" />
+                    Change Role
+                  </Button>
+                  
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
-                        <UserCog className="w-3 h-3 mr-1" />
-                        Change Role
+                        <Settings className="w-3 h-3 mr-1" />
+                        Actions
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem 
-                        onClick={() => changeUserRole(user.id, "admin")}
-                        disabled={user.role === "admin"}
-                      >
-                        Administrator
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>User Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      
+                      <DropdownMenuItem>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => changeUserRole(user.id, "operator")}
-                        disabled={user.role === "operator"}
-                      >
-                        Operator
+                      
+                      <DropdownMenuItem>
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Details
                       </DropdownMenuItem>
+                      
+                      {user.status === 'pending' && (
+                        <DropdownMenuItem onClick={() => approveUser(user.id)}>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Approve User
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {user.status === 'active' && (
+                        <DropdownMenuItem onClick={() => changeUserStatus(user.id, 'suspended')}>
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Suspend User
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {user.status === 'suspended' && (
+                        <DropdownMenuItem onClick={() => changeUserStatus(user.id, 'active')}>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Reactivate User
+                        </DropdownMenuItem>
+                      )}
+                      
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem 
-                        onClick={() => changeUserRole(user.id, "analyst")}
-                        disabled={user.role === "analyst"}
+                        className="text-destructive"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsDeleteDialogOpen(true);
+                        }}
                       >
-                        Analyst
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => changeUserRole(user.id, "viewer")}
-                        disabled={user.role === "viewer"}
-                      >
-                        Viewer
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete User
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <Button variant="outline" size="sm">
-                    <Edit className="w-3 h-3 mr-1" />
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
               
               <div className="mt-4 pt-4 border-t border-border/30">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>User ID: {user.id}</span>
-                  <div className="flex space-x-4">
+                  <div className="flex items-center space-x-4">
+                    <span>User ID: {user.id}</span>
+                    <span className="flex items-center">
+                      Status: {user.isOnline ? (
+                        <span className="flex items-center ml-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                          Online
+                        </span>
+                      ) : (
+                        <span className="flex items-center ml-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full mr-1"></div>
+                          Offline
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex space-x-2">
                     <Button variant="ghost" size="sm" className="h-8 text-xs">
-                      View Activity
+                      <Activity className="w-3 h-3 mr-1" />
+                      Activity Log
                     </Button>
                     <Button variant="ghost" size="sm" className="h-8 text-xs">
                       Reset Password
                     </Button>
                     {user.status === "pending" && (
-                      <Button variant="success" size="sm" className="h-8 text-xs">
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="h-8 text-xs bg-success hover:bg-success/90"
+                        onClick={() => approveUser(user.id)}
+                      >
+                        <CheckCircle className="w-3 h-3 mr-1" />
                         Approve
                       </Button>
                     )}
-                    <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive">
-                      <Trash2 className="w-3 h-3 mr-1" />
-                      Delete
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -435,6 +757,113 @@ export default function DashboardUsers() {
           </CardContent>
         </Card>
       )}
+
+      {/* Role Change Dialog */}
+      <AlertDialog open={isRoleChangeDialogOpen} onOpenChange={setIsRoleChangeDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change User Role</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div>Change role for <strong>{selectedUser?.name}</strong>?</div>
+              <div className="space-y-3">
+                <label className="text-sm font-medium block">Select New Role:</label>
+                <Select value={newRole} onValueChange={(value: User['role']) => setNewRole(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="super_admin">
+                      <div className="flex items-center">
+                        <Crown className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">Super Administrator</div>
+                          <div className="text-xs text-muted-foreground">Full system access and control</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <div className="flex items-center">
+                        <Settings className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">Administrator</div>
+                          <div className="text-xs text-muted-foreground">Administrative privileges and user management</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="operator">
+                      <div className="flex items-center">
+                        <Wrench className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">Operator</div>
+                          <div className="text-xs text-muted-foreground">Field operations and report management</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="analyst">
+                      <div className="flex items-center">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">Analyst</div>
+                          <div className="text-xs text-muted-foreground">Data analysis and reporting tools</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="moderator">
+                      <div className="flex items-center">
+                        <Shield className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">Moderator</div>
+                          <div className="text-xs text-muted-foreground">Community management and content moderation</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="viewer">
+                      <div className="flex items-center">
+                        <Eye className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">Viewer</div>
+                          <div className="text-xs text-muted-foreground">Read-only access to reports and data</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => selectedUser && changeUserRole(selectedUser.id, newRole)}
+              disabled={selectedUser?.role === newRole}
+            >
+              Change Role
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete User Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{selectedUser?.name}</strong>? 
+              This action cannot be undone and will permanently remove all user data and activity.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => selectedUser && deleteUser(selectedUser.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
