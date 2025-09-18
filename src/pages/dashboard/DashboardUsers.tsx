@@ -13,12 +13,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import {
   Users,
   UserPlus,
@@ -31,6 +38,7 @@ import {
   Edit,
   Trash2,
   MoreHorizontal,
+  UserCog,
 } from "lucide-react";
 
 interface User {
@@ -90,11 +98,12 @@ const usersData: User[] = [
 ];
 
 export default function DashboardUsers() {
-  const [users] = useState<User[]>(usersData);
+  const [users, setUsers] = useState<User[]>(usersData);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
+  const { toast } = useToast();
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -113,6 +122,20 @@ export default function DashboardUsers() {
       case "pending": return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
       default: return "bg-gray-500/10 text-gray-400 border-gray-500/20";
     }
+  };
+
+  const changeUserRole = (userId: string, newRole: User['role']) => {
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === userId ? { ...user, role: newRole } : user
+      )
+    );
+    
+    const user = users.find(u => u.id === userId);
+    toast({
+      title: "Role Updated",
+      description: `${user?.name}'s role has been changed to ${newRole.toUpperCase()}`,
+    });
   };
 
   const filteredUsers = users.filter((user) => {
@@ -330,6 +353,40 @@ export default function DashboardUsers() {
                 </div>
                 
                 <div className="flex items-center space-x-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <UserCog className="w-3 h-3 mr-1" />
+                        Change Role
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem 
+                        onClick={() => changeUserRole(user.id, "admin")}
+                        disabled={user.role === "admin"}
+                      >
+                        Administrator
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => changeUserRole(user.id, "operator")}
+                        disabled={user.role === "operator"}
+                      >
+                        Operator
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => changeUserRole(user.id, "analyst")}
+                        disabled={user.role === "analyst"}
+                      >
+                        Analyst
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => changeUserRole(user.id, "viewer")}
+                        disabled={user.role === "viewer"}
+                      >
+                        Viewer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <Button variant="outline" size="sm">
                     <Edit className="w-3 h-3 mr-1" />
                     Edit
