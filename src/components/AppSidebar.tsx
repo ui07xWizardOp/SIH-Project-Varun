@@ -1,109 +1,95 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  LayoutDashboard,
-  MapPin,
-  BarChart3,
-  AlertTriangle,
-  Users,
-  Settings,
-  Bell,
+  Home,
+  Wallet,
+  MessageSquare,
   Calendar,
-  FileText,
-  Activity,
-  Waves,
-  Zap,
-  Globe,
+  Settings,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
-const dashboardItems = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Live Map", url: "/dashboard/map", icon: MapPin },
-  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
-  { title: "Alerts", url: "/dashboard/alerts", icon: AlertTriangle },
-  { title: "Reports", url: "/dashboard/reports", icon: FileText },
-];
-
-const monitoringItems = [
-  { title: "Real-time Feed", url: "/dashboard/monitoring", icon: Activity },
-  { title: "Weather Data", url: "/dashboard/weather", icon: Zap },
-  { title: "Ocean Conditions", url: "/dashboard/ocean", icon: Waves },
-  { title: "Sensors", url: "/dashboard/sensors", icon: Globe },
-];
-
-const managementItems = [
-  { title: "Users", url: "/dashboard/users", icon: Users },
-  { title: "Events", url: "/dashboard/events", icon: Calendar },
-  { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+const items = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Wallets",
+    url: "/dashboard/wallets", 
+    icon: Wallet,
+  },
+  {
+    title: "Chats",
+    url: "/dashboard/chats",
+    icon: MessageSquare,
+    badge: "9",
+  },
+  {
+    title: "Calendar",
+    url: "/dashboard/calendar",
+    icon: Calendar,
+  },
+  {
+    title: "Settings",
+    url: "/dashboard/settings",
+    icon: Settings,
+  },
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const collapsed = state === "collapsed";
-
-  const isActive = (path: string) => {
-    if (path === "/dashboard" && currentPath === "/dashboard") return true;
-    if (path !== "/dashboard" && currentPath.startsWith(path)) return true;
-    return false;
-  };
-
-  const getNavCls = (path: string) =>
-    isActive(path) 
-      ? "bg-primary/10 text-primary font-medium border-r-2 border-primary" 
-      : "hover:bg-muted/50 text-muted-foreground hover:text-foreground";
+  const { state } = useSidebar()
+  const location = useLocation()
+  const currentPath = location.pathname
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible="icon">
-      <SidebarContent className="bg-card/50 backdrop-blur-sm border-r border-border/20">
-        {/* Logo Section */}
-        <div className="p-4 border-b border-border/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-ocean rounded-lg flex items-center justify-center shadow-glow-primary">
-              <Waves className="w-4 h-4 text-white" />
+    <Sidebar className="border-r-0 bg-slate-900 text-white">
+      <SidebarContent className="bg-transparent">
+        {/* Logo/Brand */}
+        <div className="p-6">
+          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-8">
+            <div className="w-8 h-8 bg-slate-900 rounded-xl flex items-center justify-center">
+              <div className="w-4 h-2 bg-white rounded-full"></div>
+              <div className="w-4 h-1 bg-white rounded-full mt-1"></div>
             </div>
-            {!collapsed && (
-              <div>
-                <h2 className="font-bold text-foreground">OceanSafe</h2>
-                <p className="text-xs text-muted-foreground">Coastal Monitoring</p>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Dashboard Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
-            Dashboard
-          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {dashboardItems.map((item) => (
+            <SidebarMenu className="space-y-2 px-4">
+              {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="transition-all duration-200">
-                    <NavLink to={item.url} end className={getNavCls(item.url)}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                      {item.title === "Alerts" && !collapsed && (
-                        <Badge variant="destructive" className="ml-auto h-5 w-5 p-0 text-xs">
-                          3
-                        </Badge>
+                  <SidebarMenuButton 
+                    asChild
+                    className={`rounded-xl p-3 relative ${
+                      currentPath === item.url 
+                        ? 'bg-white text-slate-900 font-medium' 
+                        : 'hover:bg-slate-800 text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    <Link to={item.url} className="flex items-center">
+                      <item.icon className="w-5 h-5 mr-3" />
+                      <span>{item.title}</span>
+                      {item.badge && (
+                        <span className="ml-auto bg-slate-700 text-white text-xs px-2 py-1 rounded-full">
+                          {item.badge}
+                        </span>
                       )}
-                    </NavLink>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -111,70 +97,28 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Monitoring Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
-            Monitoring
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {monitoringItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="transition-all duration-200">
-                    <NavLink to={item.url} className={getNavCls(item.url)}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Management Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
-            Management
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {managementItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="transition-all duration-200">
-                    <NavLink to={item.url} className={getNavCls(item.url)}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Status Section */}
-        {!collapsed && (
-          <div className="mt-auto p-4 border-t border-border/20">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">System Status</span>
-                <Badge variant="secondary" className="bg-success/10 text-success">
-                  Online
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Active Sensors</span>
-                <span className="font-medium">24/25</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Last Update</span>
-                <span className="font-medium">2m ago</span>
-              </div>
+        {/* Theme Toggle */}
+        <div className="mt-auto p-4">
+          <div className="flex items-center justify-between bg-slate-800 rounded-xl p-3">
+            <div className="flex items-center space-x-3">
+              <Sun className="w-4 h-4 text-slate-400" />
+              <span className="text-sm text-slate-300">Light</span>
+            </div>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="w-12 h-6 bg-slate-700 rounded-full relative transition-colors"
+            >
+              <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${
+                isDarkMode ? 'translate-x-6' : 'translate-x-0.5'
+              }`} />
+            </button>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-slate-300">Dark</span>
+              <Moon className="w-4 h-4 text-slate-400" />
             </div>
           </div>
-        )}
+        </div>
       </SidebarContent>
     </Sidebar>
-  );
+  )
 }

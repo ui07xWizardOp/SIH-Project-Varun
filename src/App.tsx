@@ -5,13 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
 import SignInPage from "./components/SignInPage";
-import DashboardLayout from "./components/DashboardLayout";
-import Dashboard from "./components/Dashboard";
-import DashboardAnalytics from "./pages/dashboard/DashboardAnalytics";
-import DashboardAlerts from "./pages/dashboard/DashboardAlerts";
-import DashboardReports from "./pages/dashboard/DashboardReports";
-import DashboardMonitoring from "./pages/dashboard/DashboardMonitoring";
-import DashboardUsers from "./pages/dashboard/DashboardUsers";
+import Dashboard from "@/components/Dashboard";
+import DashboardLayout from "@/components/DashboardLayout";
+import DashboardHome from "@/pages/dashboard/DashboardHome";
+import DashboardAnalytics from "@/pages/dashboard/DashboardAnalytics";
+import DashboardAlerts from "@/pages/dashboard/DashboardAlerts";
+import DashboardReports from "@/pages/dashboard/DashboardReports";
+import DashboardMonitoring from "@/pages/dashboard/DashboardMonitoring";
+import DashboardUsers from "@/pages/dashboard/DashboardUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +27,11 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<DashboardHome />} />
+            <Route path="wallets" element={<div className="p-6"><h1>Wallets</h1></div>} />
+            <Route path="chats" element={<div className="p-6"><h1>Chats</h1></div>} />
+            <Route path="calendar" element={<div className="p-6"><h1>Calendar</h1></div>} />
+            <Route path="settings" element={<div className="p-6"><h1>Settings</h1></div>} />
             <Route path="map" element={<Dashboard />} />
             <Route path="analytics" element={<DashboardAnalytics />} />
             <Route path="alerts" element={<DashboardAlerts />} />
@@ -38,7 +43,6 @@ const App = () => (
             <Route path="users" element={<DashboardUsers />} />
             <Route path="events" element={<DashboardReports />} />
             <Route path="notifications" element={<DashboardAlerts />} />
-            <Route path="settings" element={<DashboardUsers />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
