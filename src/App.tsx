@@ -28,10 +28,6 @@ const App = () => (
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
-            <Route path="wallets" element={<div className="p-6"><h1>Wallets</h1></div>} />
-            <Route path="chats" element={<div className="p-6"><h1>Chats</h1></div>} />
-            <Route path="calendar" element={<div className="p-6"><h1>Calendar</h1></div>} />
-            <Route path="settings" element={<div className="p-6"><h1>Settings</h1></div>} />
             <Route path="map" element={<Dashboard />} />
             <Route path="analytics" element={<DashboardAnalytics />} />
             <Route path="alerts" element={<DashboardAlerts />} />
@@ -41,8 +37,6 @@ const App = () => (
             <Route path="ocean" element={<DashboardMonitoring />} />
             <Route path="sensors" element={<DashboardMonitoring />} />
             <Route path="users" element={<DashboardUsers />} />
-            <Route path="events" element={<DashboardReports />} />
-            <Route path="notifications" element={<DashboardAlerts />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

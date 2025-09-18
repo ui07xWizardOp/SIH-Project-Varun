@@ -5,20 +5,28 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
+  BarChart3,
   Home,
-  Wallet,
-  MessageSquare,
-  Calendar,
+  Users,
   Settings,
+  Bell,
+  FileText,
+  Shield,
+  Activity,
+  Waves,
+  MapPin,
+  AlertTriangle,
   Sun,
   Moon,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const items = [
   {
@@ -27,25 +35,35 @@ const items = [
     icon: Home,
   },
   {
-    title: "Wallets",
-    url: "/dashboard/wallets", 
-    icon: Wallet,
+    title: "Live Map",
+    url: "/dashboard/map", 
+    icon: MapPin,
   },
   {
-    title: "Chats",
-    url: "/dashboard/chats",
-    icon: MessageSquare,
-    badge: "9",
+    title: "Analytics",
+    url: "/dashboard/analytics",
+    icon: BarChart3,
   },
   {
-    title: "Calendar",
-    url: "/dashboard/calendar",
-    icon: Calendar,
+    title: "Alerts",
+    url: "/dashboard/alerts",
+    icon: AlertTriangle,
+    badge: "3",
   },
   {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: Settings,
+    title: "Reports",
+    url: "/dashboard/reports",
+    icon: FileText,
+  },
+  {
+    title: "Monitoring",
+    url: "/dashboard/monitoring",
+    icon: Activity,
+  },
+  {
+    title: "Users",
+    url: "/dashboard/users",
+    icon: Users,
   },
 ];
 
@@ -61,9 +79,8 @@ export function AppSidebar() {
         {/* Logo/Brand */}
         <div className="p-6">
           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-8">
-            <div className="w-8 h-8 bg-slate-900 rounded-xl flex items-center justify-center">
-              <div className="w-4 h-2 bg-white rounded-full"></div>
-              <div className="w-4 h-1 bg-white rounded-full mt-1"></div>
+            <div className="w-8 h-8 bg-gradient-ocean rounded-xl flex items-center justify-center">
+              <Waves className="w-4 h-4 text-white" />
             </div>
           </div>
         </div>
@@ -85,7 +102,7 @@ export function AppSidebar() {
                       <item.icon className="w-5 h-5 mr-3" />
                       <span>{item.title}</span>
                       {item.badge && (
-                        <span className="ml-auto bg-slate-700 text-white text-xs px-2 py-1 rounded-full">
+                        <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                           {item.badge}
                         </span>
                       )}
