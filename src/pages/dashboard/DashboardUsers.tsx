@@ -589,7 +589,10 @@ export default function DashboardUsers() {
                         {user.isOnline && <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>}
                       </h3>
                       <Badge className={getRoleColor(user.role)} variant="outline">
-                        {React.createElement(getRoleIcon(user.role), { className: "w-3 h-3 mr-1" })}
+                        {(() => {
+                          const IconComponent = getRoleIcon(user.role);
+                          return <IconComponent className="w-3 h-3 mr-1" />;
+                        })()}
                         {user.role.replace('_', ' ').toUpperCase()}
                       </Badge>
                       <Badge className={getStatusColor(user.status)} variant="outline">
